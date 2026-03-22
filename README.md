@@ -28,24 +28,47 @@ The sink writes notes under a configurable root prefix, default `Agents/`:
 
 ## Install
 
-### Codex
+Run the installer from the repository root:
 
 ```bash
 cd ~/skills/agent-obsidian-memory
-./scripts/install.sh --target codex
-cp examples/obsidian-memory.json.example ~/.codex/memories/obsidian-memory.json
+./install.sh --target codex
 ```
 
-Then edit `~/.codex/memories/obsidian-memory.json` and set `vault_root`.
-
-### Claude
+or:
 
 ```bash
 cd ~/skills/agent-obsidian-memory
-./scripts/install.sh --target claude
+./install.sh --target claude
 ```
 
-Copy `examples/obsidian-memory.json.example` into the config location used by your Claude workflow, then set the vault path.
+The installer:
+- installs the three skills into the target skills directory
+- creates or updates the target `AGENTS.md`
+- creates `~/.codex/memories/obsidian-memory.json` if it does not already exist
+
+Codex and Claude share the same default memory config path:
+
+```bash
+~/.codex/memories/obsidian-memory.json
+```
+
+After installation, edit that file and set `vault_root`.
+
+### Existing Files
+
+The installer is designed to be safe to re-run:
+
+- existing skill folders are replaced with the versions from this repo
+- existing `AGENTS.md` content is preserved, and only the managed Session Memory block is inserted or updated
+- existing `obsidian-memory.json` is preserved and not overwritten
+- when an existing `AGENTS.md` is modified, a backup file is created first
+
+### Advanced Usage
+
+```bash
+./install.sh --target codex --skills-dir /custom/skills --agents-file /custom/AGENTS.md --config-file /custom/obsidian-memory.json
+```
 
 ## Typical Flow
 
@@ -58,9 +81,9 @@ For cross-project agent tooling or memory-system work, route the note to `agent-
 ## Repository Layout
 
 - `skills/`: the reusable skills
-- `templates/`: AGENTS templates for Codex and Claude
+- `templates/`: full AGENTS templates plus mergeable Session Memory snippets
 - `examples/`: example config files
-- `scripts/`: install helper
+- `scripts/`: installer implementation
 
 ## Status
 
