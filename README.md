@@ -1,34 +1,22 @@
 # agent-obsidian-memory
 
-`agent-obsidian-memory` is a small skill pack for Codex- and Claude-style agents that turns `plan`, `result`, and `handoff` checkpoints into durable Obsidian notes.
+`agent-obsidian-memory` is a skill pack for Codex- and Claude-style agents that turns structured work checkpoints into durable Obsidian notes.
+
+It is for people who already run agent workflows and want memory written back into their vault after the work is done. It is intentionally **not an Obsidian plugin** and not a chat-in-vault assistant.
 
 ## Why It Exists
 
-Most Obsidian AI tools focus on chatting inside the vault. This project focuses on the opposite direction: agents doing work elsewhere, then writing structured memory back into Obsidian.
+Most Obsidian AI tooling focuses on interacting inside the vault. This project focuses on the opposite direction: agents do work elsewhere, then write the durable summary back into Obsidian in a predictable format.
 
-The workflow is intentionally split into two parts:
-- `session-checkpoint` creates the structured summary.
-- `obsidian-memory-sink` persists that summary into Obsidian.
+The workflow is intentionally split:
 
-`done-global` remains the explicit session wrap-up entrypoint.
+- `session-checkpoint` creates the structured summary
+- `obsidian-memory-sink` writes that summary into Obsidian
+- `done-global` handles explicit end-of-session handoffs
 
-## Included Skills
+## Quick Start
 
-- `session-checkpoint`
-- `obsidian-memory-sink`
-- `done-global`
-
-## Note Layout
-
-The sink writes notes under a configurable root prefix, default `Agents/`:
-
-- `Projects/<project>.md`
-- `Daily/YYYY-MM-DD.md`
-- `Sessions/<project>/<year>/<timestamp>_<trigger>.md`
-
-## Install
-
-Run the installer from the repository root:
+Install from the repository root:
 
 ```bash
 cd ~/skills/agent-obsidian-memory
@@ -42,37 +30,48 @@ cd ~/skills/agent-obsidian-memory
 ./install.sh --target claude
 ```
 
-The installer:
-- installs the three skills into the target skills directory
-- creates or updates the target `AGENTS.md`
-- creates `~/.codex/memories/obsidian-memory.json` if it does not already exist
-
-Codex and Claude share the same default memory config path:
+Then edit:
 
 ```bash
 ~/.codex/memories/obsidian-memory.json
 ```
 
-After installation, edit that file and set `vault_root`.
+and set `vault_root` to your Obsidian vault.
 
-### Existing Files
+## What It Installs
 
-The installer is designed to be safe to re-run:
+The installer:
+
+- installs `session-checkpoint`, `obsidian-memory-sink`, and `done-global`
+- creates or updates the target `AGENTS.md`
+- creates `~/.codex/memories/obsidian-memory.json` if it does not already exist
+
+It is safe to rerun:
 
 - existing skill folders are replaced with the versions from this repo
 - existing `AGENTS.md` content is preserved, and only the managed Session Memory block is inserted or updated
 - existing `obsidian-memory.json` is preserved and not overwritten
 - when an existing `AGENTS.md` is modified, a backup file is created first
 
-### Advanced Usage
+Advanced usage:
 
 ```bash
 ./install.sh --target codex --skills-dir /custom/skills --agents-file /custom/AGENTS.md --config-file /custom/obsidian-memory.json
 ```
 
-## Releases
+## Who This Is For
 
-Release tags use `vX.Y.Z` format. The manual release flow is documented in `RELEASING.md`.
+This repo is a good fit if you:
+
+- already use Codex, Claude, or similar agent workflows
+- want repeatable memory writes into Obsidian after planning, implementation, or handoff
+- prefer simple shell-based setup over a hosted service
+
+This repo is probably not the right fit if you want:
+
+- an Obsidian plugin UI
+- an in-vault chat assistant
+- a general-purpose knowledge management system by itself
 
 ## Typical Flow
 
@@ -82,16 +81,20 @@ Release tags use `vX.Y.Z` format. The manual release flow is documented in `RELE
 
 For cross-project agent tooling or memory-system work, route the note to `agent-memory-system` with `--project-slug agent-memory-system`.
 
+## Releases
+
+Release tags use `vX.Y.Z` format. The manual release flow is documented in `RELEASING.md`.
+
 ## Repository Layout
 
-- `skills/`: the reusable skills
+- `skills/`: reusable skills
 - `templates/`: full AGENTS templates plus mergeable Session Memory snippets
 - `examples/`: example config files
 - `scripts/`: installer implementation
 
 ## Status
 
-This repo is a workflow pack, not an Obsidian plugin or a hosted service. It is designed to be copied into existing agent setups and adapted as needed.
+This repo is a workflow pack, not a hosted product. It is designed to be copied into an existing agent setup and adapted as needed.
 
 ## License
 
