@@ -47,6 +47,10 @@ cd ~/skills/agent-obsidian-memory
 
 Copy `examples/obsidian-memory.json.example` into the config location used by your Claude workflow, then set the vault path.
 
+## Releases
+
+Release tags use `vX.Y.Z` format. The manual release flow is documented in `RELEASING.md`.
+
 ## Typical Flow
 
 1. Generate a structured checkpoint with `session-checkpoint`.
