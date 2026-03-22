@@ -1,18 +1,19 @@
 # Releasing
 
-This repository uses a manual GitHub Releases flow.
+This repository currently uses a manual GitHub Releases flow.
 
 ## Versioning
 
 - Release tags use the format `vX.Y.Z`.
-- The first published release is `v0.1.0`.
 - Releases are cut from `main`.
+- Use patch releases for small fixes and documentation cleanups.
+- Use minor releases when installation flow or user-facing project shape changes in meaningful ways.
 
-## Release Scope
+## Release Style
 
-- `v0.1.0` is a source-only release.
+- Releases are source-only.
 - Do not upload custom binaries or zip artifacts.
-- `installer` branch changes are not part of `v0.1.0`.
+- Publish from a clean `main` checkout with `gh` CLI.
 
 ## Preflight Checks
 
@@ -30,10 +31,10 @@ Confirm:
 
 - `main` is the current branch
 - there are no unexpected working tree changes
-- `v0.1.0` does not already exist locally or remotely
+- the target version does not already exist locally or remotely
 - `gh` is installed and authenticated
 
-## Publish v0.1.0
+## Generic Release Flow
 
 Push the release base to GitHub before tagging:
 
@@ -44,30 +45,45 @@ git push origin main
 Create the annotated tag:
 
 ```bash
-git tag -a v0.1.0 -m "v0.1.0"
-git push origin v0.1.0
+git tag -a <version> -m "<version>"
+git push origin <version>
 ```
 
-Create release notes in a temporary file:
+Create release notes in a temporary file, then publish:
 
 ```bash
-cat > /tmp/agent-obsidian-memory-v0.1.0.md <<'EOF'
+gh release create <version> \
+  --title "<version>" \
+  --notes-file /tmp/<repo>-<version>.md
+```
+
+## v0.2.0 Example
+
+`v0.2.0` is the release where the project becomes materially easier to install and understand. It includes the installer and homepage README improvements now on `main`.
+
+Example notes file:
+
+```bash
+cat > /tmp/agent-obsidian-memory-v0.2.0.md <<'EOF'
 ## Summary
-- Initial release of agent-obsidian-memory
-- Includes session-checkpoint, obsidian-memory-sink, and done-global
-- Source-only release from main
+- Adds a root `./install.sh` entrypoint
+- Makes installer reruns safer by preserving config and updating AGENTS via a managed block
+- Rewrites the README into a clearer project homepage
 
 ## Notes
-- Installer branch improvements are not included in v0.1.0
+- Source-only release from main
+- Covers the installer and homepage README upgrade line after v0.1.0
 EOF
 ```
 
-Publish the GitHub Release:
+Publish:
 
 ```bash
-gh release create v0.1.0 \
-  --title "v0.1.0" \
-  --notes-file /tmp/agent-obsidian-memory-v0.1.0.md
+git tag -a v0.2.0 -m "v0.2.0"
+git push origin v0.2.0
+gh release create v0.2.0 \
+  --title "v0.2.0" \
+  --notes-file /tmp/agent-obsidian-memory-v0.2.0.md
 ```
 
 ## Verification
@@ -76,7 +92,7 @@ After publishing:
 
 ```bash
 git ls-remote --tags origin
-gh release view v0.1.0
+gh release view <version>
 ```
 
 Confirm the release is visible on GitHub and only uses GitHub's default source archives.
