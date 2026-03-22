@@ -11,9 +11,9 @@ This repository currently uses a manual GitHub Releases flow.
 
 ## Release Style
 
-- Releases are source-only.
-- Do not upload custom binaries or zip artifacts.
+- Releases are source-only plus one generated bootstrap asset.
 - Publish from a clean `main` checkout with `gh` CLI.
+- The bootstrap asset filename is always `agent-obsidian-memory-installer.sh`.
 
 ## Preflight Checks
 
@@ -49,12 +49,21 @@ git tag -a <version> -m "<version>"
 git push origin <version>
 ```
 
-Create release notes in a temporary file, then publish:
+Create release notes in a temporary file.
+
+Build the release installer asset:
+
+```bash
+./scripts/build_release_installer.sh <version> dist/agent-obsidian-memory-installer.sh
+```
+
+Then publish:
 
 ```bash
 gh release create <version> \
   --title "<version>" \
-  --notes-file /tmp/<repo>-<version>.md
+  --notes-file /tmp/<repo>-<version>.md \
+  dist/agent-obsidian-memory-installer.sh#agent-obsidian-memory-installer.sh
 ```
 
 ## v0.2.0 Example
@@ -69,6 +78,7 @@ cat > /tmp/agent-obsidian-memory-v0.2.0.md <<'EOF'
 - Adds a root `./install.sh` entrypoint
 - Makes installer reruns safer by preserving config and updating AGENTS via a managed block
 - Rewrites the README into a clearer project homepage
+- Adds a latest-release bootstrap installer for macOS-first `curl | bash` installs
 
 ## Notes
 - Source-only release from main
@@ -79,11 +89,13 @@ EOF
 Publish:
 
 ```bash
+./scripts/build_release_installer.sh v0.2.0 dist/agent-obsidian-memory-installer.sh
 git tag -a v0.2.0 -m "v0.2.0"
 git push origin v0.2.0
 gh release create v0.2.0 \
   --title "v0.2.0" \
-  --notes-file /tmp/agent-obsidian-memory-v0.2.0.md
+  --notes-file /tmp/agent-obsidian-memory-v0.2.0.md \
+  dist/agent-obsidian-memory-installer.sh#agent-obsidian-memory-installer.sh
 ```
 
 ## Verification

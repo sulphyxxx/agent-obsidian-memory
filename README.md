@@ -16,7 +16,21 @@ The workflow is intentionally split:
 
 ## Quick Start
 
-Install from the repository root:
+Install the latest release directly:
+
+```bash
+curl -fsSL https://github.com/sulphyxxx/agent-obsidian-memory/releases/latest/download/agent-obsidian-memory-installer.sh | bash -s -- --target codex
+```
+
+or:
+
+```bash
+curl -fsSL https://github.com/sulphyxxx/agent-obsidian-memory/releases/latest/download/agent-obsidian-memory-installer.sh | bash -s -- --target claude
+```
+
+The external installer is macOS-first for now.
+
+If you prefer the repo-local path, install from the repository root:
 
 ```bash
 cd ~/skills/agent-obsidian-memory
