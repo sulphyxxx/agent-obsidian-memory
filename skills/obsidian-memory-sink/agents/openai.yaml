@@ -1,0 +1,6 @@
+interface:
+  display_name: "Obsidian Memory Sink"
+  short_description: "Persist agent summaries into an Obsidian vault"
+  default_prompt: "Use $obsidian-memory-sink to persist an existing structured summary into Obsidian project, daily, and session notes."
+policy:
+  allow_implicit_invocation: true

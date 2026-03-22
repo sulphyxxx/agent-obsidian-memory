@@ -1,0 +1,6 @@
+interface:
+  display_name: "Session Checkpoint"
+  short_description: "Checkpoint summaries for plans, results, and handoffs"
+  default_prompt: "Use $session-checkpoint to capture the current checkpoint as a structured markdown summary."
+policy:
+  allow_implicit_invocation: true

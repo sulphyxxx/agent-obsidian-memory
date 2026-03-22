@@ -1,0 +1,7 @@
+interface:
+  display_name: "Done Session Logger"
+  short_description: "Save /done notes with decisions, risks, and next actions"
+  default_prompt: "Use $done-global to summarize this session and save a markdown handoff note."
+
+policy:
+  allow_implicit_invocation: true
