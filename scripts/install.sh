@@ -24,18 +24,8 @@ agents_file=""
 config_file=""
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
-default_config_path_for_target() {
-  case "$1" in
-    codex)
-      printf '%s\n' "${HOME}/.codex/memories/obsidian-memory.json"
-      ;;
-    claude)
-      printf '%s\n' "${HOME}/.claude/memories/obsidian-memory.json"
-      ;;
-    *)
-      return 1
-      ;;
-  esac
+default_config_path() {
+  printf '%s\n' "${HOME}/.agent-memory/obsidian-memory.json"
 }
 
 backup_file() {
@@ -169,7 +159,7 @@ case "$target" in
     ;;
 esac
 
-: "${config_file:=$(default_config_path_for_target "$target")}"
+: "${config_file:=$(default_config_path)}"
 
 mkdir -p "$skills_dir"
 for skill in session-checkpoint obsidian-memory-sink done-global; do

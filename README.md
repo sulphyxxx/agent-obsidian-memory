@@ -31,16 +31,10 @@ npx skills add sulphyxxx/agent-obsidian-memory
 Then edit:
 
 ```bash
-~/.codex/memories/obsidian-memory.json
+~/.agent-memory/obsidian-memory.json
 ```
 
-or:
-
-```bash
-~/.claude/memories/obsidian-memory.json
-```
-
-Use the Codex path when you installed for Codex, and the Claude path when you installed for Claude. If you install through another skills-platform integration, pass an explicit `--config-file` when you run the installer or scripts.
+This root is shared across supported agent platforms. `--target codex|claude` still controls where skills and `AGENTS.md` are installed, but the default Obsidian memory config now lives under `~/.agent-memory/`.
 
 Then set `vault_root` to your Obsidian vault.
 
@@ -86,7 +80,7 @@ The installer:
 
 - installs `session-checkpoint`, `obsidian-memory-sink`, and `done-global`
 - creates or updates the target `AGENTS.md`
-- creates the platform-default `obsidian-memory.json` if it does not already exist
+- creates `~/.agent-memory/obsidian-memory.json` if it does not already exist
 
 It is safe to rerun:
 
@@ -95,10 +89,10 @@ It is safe to rerun:
 - existing `obsidian-memory.json` is preserved and not overwritten
 - when an existing `AGENTS.md` is modified, a backup file is created first
 
-Default config paths:
+Default config root:
 
-- Codex: `~/.codex/memories/obsidian-memory.json`
-- Claude: `~/.claude/memories/obsidian-memory.json`
+- Shared agent-memory config: `~/.agent-memory/obsidian-memory.json`
+- Shared done notes root: `~/.agent-memory/session-notes`
 
 Advanced usage:
 

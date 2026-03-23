@@ -1,6 +1,6 @@
 ---
 name: done-global
-description: Use this skill when a user sends `/done` or asks to end a session with a handoff summary. It saves a structured markdown note under the platform-default session-notes root and updates project `SESSION_SUMMARY.md` when that file exists.
+description: Use this skill when a user sends `/done` or asks to end a session with a handoff summary. It saves a structured markdown note under `~/.agent-memory/session-notes` and updates project `SESSION_SUMMARY.md` when that file exists.
 metadata:
   short-description: Save /done context globally and in-project
 ---
@@ -21,10 +21,10 @@ Use this skill only for explicit session wrap-up requests.
 3. Run:
    - `bash "<skills-dir>/done-global/scripts/write_done_note.sh" --project-root "$PWD" --summary-file "$TMP_SUMMARY"`
    - If a session identifier is available, add: `--session-id "<id>"`
-4. If the platform-default Obsidian memory config exists and is enabled, also run:
+4. If `~/.agent-memory/obsidian-memory.json` exists and is enabled, also run:
    - `bash "<skills-dir>/obsidian-memory-sink/scripts/write_obsidian_memory.sh" --project-root "$PWD" --summary-file "$TMP_SUMMARY" --trigger handoff`
    - If a session identifier is available, add: `--session-id "<id>"`
-   - If the session is about global agent-memory tooling rather than the current repo, replace `--project-root "$PWD"` with `--project-root "<agent-home>" --project-slug agent-memory-system`
+   - If the session is about global agent-memory tooling rather than the current repo, replace `--project-root "$PWD"` with `--project-root "${HOME}/.agent-memory" --project-slug agent-memory-system`
 5. Read command output and return these fields:
    - `GLOBAL_NOTE`
    - `PROJECT_SUMMARY`
@@ -40,15 +40,13 @@ Use this skill only for explicit session wrap-up requests.
 - If nothing happened in a section, write `- None`.
 - Keep file list and command list explicit when available.
 
-Platform defaults:
+Platform-specific install locations:
 
-- Codex config: `~/.codex/memories/obsidian-memory.json`
-- Claude config: `~/.claude/memories/obsidian-memory.json`
 - Codex skills dir: `~/.codex/skills`
 - Claude skills dir: `~/.claude/skills`
-- Codex session notes: `~/.codex/session-notes`
-- Claude session notes: `~/.claude/session-notes`
-- Other platforms should pass explicit `--config-file` and resolve the installed skills dir directly
+- Shared agent-memory config: `~/.agent-memory/obsidian-memory.json`
+- Shared done notes root: `~/.agent-memory/session-notes`
+- Other platforms should resolve the installed skills dir directly and can still override paths explicitly
 
 ## Required Sections
 
