@@ -15,6 +15,14 @@ This repository currently uses a manual GitHub Releases flow.
 - Publish from a clean `main` checkout with `gh` CLI.
 - The bootstrap asset filename is always `agent-obsidian-memory-installer.sh`.
 
+## skills.sh Positioning
+
+Treat `sulphyxxx/agent-obsidian-memory` as a repository-level skills pack.
+
+- Lead README installation instructions with `npx skills add sulphyxxx/agent-obsidian-memory`.
+- Keep the GitHub release bootstrap installer as an alternative path, not the primary homepage call to action.
+- Keep README language focused on the three installed skills: `session-checkpoint`, `obsidian-memory-sink`, and `done-global`.
+
 ## Preflight Checks
 
 Run these commands from a clean checkout on `main`:
@@ -98,7 +106,7 @@ gh release create v0.2.0 \
   dist/agent-obsidian-memory-installer.sh#agent-obsidian-memory-installer.sh
 ```
 
-## Verification
+## Post-Release Verification
 
 After publishing:
 
@@ -108,3 +116,9 @@ gh release view <version>
 ```
 
 Confirm the release is visible on GitHub and only uses GitHub's default source archives.
+
+Then verify the public install path and listing behavior:
+
+- Run `npx skills add sulphyxxx/agent-obsidian-memory` from a clean environment.
+- Confirm the target agent environment can discover the installed skills.
+- Check `skills.sh` after installs propagate and confirm the repo appears with reasonable metadata.

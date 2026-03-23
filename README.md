@@ -4,6 +4,12 @@
 
 It is for people who already run agent workflows and want memory written back into their vault after the work is done. It is intentionally **not an Obsidian plugin** and not a chat-in-vault assistant.
 
+This repo installs three cooperating skills:
+
+- `session-checkpoint` for structured plan/result/handoff summaries
+- `obsidian-memory-sink` for writing those summaries into Obsidian
+- `done-global` for explicit `/done` handoffs and wrap-ups
+
 ## Why It Exists
 
 Most Obsidian AI tooling focuses on interacting inside the vault. This project focuses on the opposite direction: agents do work elsewhere, then write the durable summary back into Obsidian in a predictable format.
@@ -16,7 +22,29 @@ The workflow is intentionally split:
 
 ## Quick Start
 
-Install the latest release directly:
+Install from the skills ecosystem:
+
+```bash
+npx skills add sulphyxxx/agent-obsidian-memory
+```
+
+Then edit:
+
+```bash
+~/.codex/memories/obsidian-memory.json
+```
+
+and set `vault_root` to your Obsidian vault.
+
+## Included Skills
+
+- `session-checkpoint` creates structured plan, result, and handoff summaries.
+- `obsidian-memory-sink` writes those summaries into your configured Obsidian vault.
+- `done-global` captures explicit `/done` handoffs.
+
+## Alternative Install Paths
+
+Install the latest release bootstrapper directly:
 
 ```bash
 curl -fsSL https://github.com/sulphyxxx/agent-obsidian-memory/releases/latest/download/agent-obsidian-memory-installer.sh | bash -s -- --target codex
@@ -44,14 +72,6 @@ cd ~/skills/agent-obsidian-memory
 ./install.sh --target claude
 ```
 
-Then edit:
-
-```bash
-~/.codex/memories/obsidian-memory.json
-```
-
-and set `vault_root` to your Obsidian vault.
-
 ## What It Installs
 
 The installer:
@@ -78,6 +98,7 @@ Advanced usage:
 This repo is a good fit if you:
 
 - already use Codex, Claude, or similar agent workflows
+- want a skills-pack install path that works well with `skills.sh`
 - want repeatable memory writes into Obsidian after planning, implementation, or handoff
 - prefer simple shell-based setup over a hosted service
 
