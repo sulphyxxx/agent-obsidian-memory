@@ -197,11 +197,13 @@ fi
 session_note="${sessions_dir}/${session_stem}.md"
 project_note="${projects_dir}/${project_slug}.md"
 daily_note="${daily_dir}/${day_stamp}.md"
+sessions_root="${vault_root}/${root_prefix}/Sessions"
 
-python3 - "$summary_file" "$session_note" "$project_note" "$daily_note" "$project_slug" "$repo_root" "$trigger" "$ts" "$root_prefix" "$session_id" <<'PY'
+python3 - "$summary_file" "$session_note" "$project_note" "$daily_note" "$project_slug" "$repo_root" "$trigger" "$ts" "$root_prefix" "$session_id" "$sessions_root" <<'PY'
 from __future__ import annotations
 
 from pathlib import Path
+import re
 import sys
 
 summary_path = Path(sys.argv[1])
@@ -214,26 +216,111 @@ trigger = sys.argv[7]
 generated_at = sys.argv[8]
 root_prefix = sys.argv[9].strip("/")
 session_id = sys.argv[10] or "N/A"
+sessions_root = Path(sys.argv[11])
 
 summary_text = summary_path.read_text(encoding="utf-8").strip()
 
-sections: dict[str, list[str]] = {}
-current: str | None = None
-for line in summary_text.splitlines():
-    if line.startswith("## "):
-        current = line[3:].strip()
-        sections[current] = []
-    elif current is not None:
-        sections[current].append(line)
+SECTION_ORDER = [
+    "Discussion Summary",
+    "Key Decisions",
+    "Completed Work",
+    "Open Issues / Risks",
+    "Next Actions",
+]
 
-def section_body(name: str) -> str:
-    body = "\n".join(sections.get(name, [])).strip()
+def parse_summary_sections(text: str) -> dict[str, str]:
+    parsed: dict[str, list[str]] = {}
+    current_name: str | None = None
+    for raw_line in text.splitlines():
+        if raw_line.startswith("## "):
+            current_name = raw_line[3:].strip()
+            parsed[current_name] = []
+        elif current_name is not None:
+            parsed[current_name].append(raw_line)
+    return {name: "\n".join(lines).strip() for name, lines in parsed.items()}
+
+
+def section_body(sections: dict[str, str], name: str) -> str:
+    body = sections.get(name, "").strip()
     return body or "- None"
 
-discussion = section_body("Discussion Summary")
-decisions = section_body("Key Decisions")
-risks = section_body("Open Issues / Risks")
-next_actions = section_body("Next Actions")
+
+def section_has_content(body: str) -> bool:
+    normalized = body.strip()
+    if not normalized:
+        return False
+    return normalized not in {"- None", "- None."}
+
+
+def render_daily_entry(record: dict[str, str], session_link: str, project_link: str) -> str:
+    time_label = record.get("time_label", "").strip()
+    lines = [
+        f"## {time_label} {record['trigger']} · {project_link}".rstrip(),
+        f"- Note: {session_link}",
+    ]
+    lines.append("")
+    for name in SECTION_ORDER:
+        body = record["sections"].get(name, "").strip()
+        if section_has_content(body):
+            lines.extend([f"### {name}", body, ""])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
+    if not text.startswith("---\n"):
+        return {}, text
+    _, _, remainder = text.partition("---\n")
+    frontmatter_text, marker, body = remainder.partition("---\n")
+    if not marker:
+        return {}, text
+    frontmatter: dict[str, str] = {}
+    for line in frontmatter_text.splitlines():
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        frontmatter[key.strip()] = value.strip()
+    return frontmatter, body
+
+
+def collect_daily_records() -> list[dict[str, str]]:
+    records: list[dict[str, str]] = []
+    pattern = f"*/{daily_path.stem[:4]}/{daily_path.stem}_*.md"
+    for candidate in sorted(sessions_root.glob(pattern)):
+        text = candidate.read_text(encoding="utf-8")
+        frontmatter, body = parse_frontmatter(text)
+        summary_start = body.find("## ")
+        summary_only = body[summary_start:].strip() if summary_start != -1 else ""
+        sections = parse_summary_sections(summary_only)
+        stem_match = re.match(r"(?P<day>\d{4}-\d{2}-\d{2})_(?P<time>\d{6})_(?P<trigger>[a-z]+)", candidate.stem)
+        if not stem_match:
+            continue
+        candidate_project = frontmatter.get("project", candidate.parent.parent.name)
+        records.append(
+            {
+                "project_slug": candidate_project,
+                "trigger": frontmatter.get("trigger", stem_match.group("trigger")),
+                "generated_at": frontmatter.get("generated_at", ""),
+                "time_label": f"{stem_match.group('time')[:2]}:{stem_match.group('time')[2:4]}",
+                "session_stem": candidate.stem,
+                "session_year": candidate.parent.name,
+                "sections": sections,
+                "sort_key": (
+                    stem_match.group("day"),
+                    stem_match.group("time"),
+                    candidate_project,
+                    candidate.stem,
+                ),
+            }
+        )
+    records.sort(key=lambda item: item["sort_key"])
+    return records
+
+
+summary_sections = parse_summary_sections(summary_text)
+discussion = section_body(summary_sections, "Discussion Summary")
+decisions = section_body(summary_sections, "Key Decisions")
+risks = section_body(summary_sections, "Open Issues / Risks")
+next_actions = section_body(summary_sections, "Next Actions")
 
 session_stem = session_path.stem
 session_rel = f"{root_prefix}/Sessions/{project_slug}/{session_path.parent.name}/{session_stem}"
@@ -348,23 +435,44 @@ new_project = "\n".join(
 )
 project_path.write_text(new_project, encoding="utf-8")
 
-daily_header = f"# Daily Agent Memory - {daily_path.stem}\n\n"
-daily_entry = "\n".join(
-    [
-        f"## {trigger} / {project_slug} / {session_path.stem}",
-        f"- Project: {project_link}",
-        f"- Session: {session_link}",
-        "",
-    ]
+daily_records = collect_daily_records()
+project_links = sorted(
+    {
+        f"[[{root_prefix}/Projects/{record['project_slug']}|{record['project_slug']}]]"
+        for record in daily_records
+    }
 )
-if daily_path.exists():
-    daily_text = daily_path.read_text(encoding="utf-8")
-else:
-    daily_text = daily_header
+open_items_remaining = sum(
+    1
+    for record in daily_records
+    if section_has_content(record["sections"].get("Open Issues / Risks", ""))
+    or section_has_content(record["sections"].get("Next Actions", ""))
+)
+daily_lines = [
+    f"# Daily Agent Memory - {daily_path.stem}",
+    "",
+    "## Today at a glance",
+    f"- Checkpoints: `{len(daily_records)}`",
+    f"- Projects: {', '.join(project_links) if project_links else '- None'}",
+    f"- Follow-ups: `{open_items_remaining}`",
+]
+for record in daily_records:
+    record_project_rel = f"{root_prefix}/Projects/{record['project_slug']}"
+    record_session_rel = (
+        f"{root_prefix}/Sessions/{record['project_slug']}/{record['session_year']}/{record['session_stem']}"
+    )
+    daily_lines.extend(
+        [
+            "",
+            render_daily_entry(
+                record,
+                f"[[{record_session_rel}|{record['session_stem']}]]",
+                f"[[{record_project_rel}|{record['project_slug']}]]",
+            ).rstrip(),
+        ]
+    )
 
-if session_link not in daily_text:
-    daily_text = daily_text.rstrip() + "\n\n" + daily_entry
-    daily_path.write_text(daily_text.rstrip() + "\n", encoding="utf-8")
+daily_path.write_text("\n".join(daily_lines).rstrip() + "\n", encoding="utf-8")
 PY
 
 printf 'SESSION_NOTE=%s\n' "$session_note"

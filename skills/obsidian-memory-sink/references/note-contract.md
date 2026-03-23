@@ -16,8 +16,18 @@ The writer creates or updates three note classes under the configured prefix, de
 ## Daily
 
 - Path: `Daily/YYYY-MM-DD.md`
-- Purpose: append-only timeline
-- One entry per written checkpoint
+- Purpose: readable same-day overview plus checkpoint timeline
+- Managed sections:
+  - `Today at a glance`
+  - one expanded entry per written checkpoint
+- Daily overview includes:
+  - total checkpoints
+  - touched projects
+  - remaining open items count
+- Each checkpoint entry includes:
+  - project link
+  - session link
+  - non-empty summary sections such as decisions, completed work, risks, and next actions
 
 ## Sessions
 
