@@ -16,9 +16,32 @@ Options:
   --session-id <id>           Optional session identifier.
   --vault-root <path>         Override vault root from config.
   --root-prefix <path>        Override note prefix from config. Default: Agents.
-  --config-file <path>        Config file path (default: $HOME/.codex/memories/obsidian-memory.json).
+  --config-file <path>        Config file path (default: platform-specific default).
   -h, --help                  Show this help.
 USAGE
+}
+
+default_config_file() {
+  local codex_home="${CODEX_HOME:-${HOME}/.codex}"
+  local claude_home="${CLAUDE_HOME:-${HOME}/.claude}"
+  local codex_home_real
+  local claude_home_real
+  local script_dir
+  codex_home_real="$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$codex_home")"
+  claude_home_real="$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$claude_home")"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+
+  case "$script_dir" in
+    "${claude_home_real}/skills/"*)
+      printf '%s\n' "${claude_home}/memories/obsidian-memory.json"
+      ;;
+    "${codex_home_real}/skills/"*)
+      printf '%s\n' "${codex_home}/memories/obsidian-memory.json"
+      ;;
+    *)
+      printf '%s\n' "${codex_home}/memories/obsidian-memory.json"
+      ;;
+  esac
 }
 
 project_root="${PWD}"
@@ -28,7 +51,7 @@ trigger=""
 session_id=""
 vault_root=""
 root_prefix=""
-config_file="${HOME}/.codex/memories/obsidian-memory.json"
+config_file="$(default_config_file)"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

@@ -12,11 +12,34 @@ Required:
 Options:
   --project-root <path>       Project path (default: current working directory).
   --session-id <id>           Optional session identifier for filename preference.
-  --global-root <path>        Global output root (default: $HOME/.codex/session-notes).
+  --global-root <path>        Global output root (default: platform-specific default).
   --trigger <text>            Trigger label (default: /done).
   --no-project-summary        Skip in-project SESSION_SUMMARY.md update.
   -h, --help                  Show this help.
 USAGE
+}
+
+default_global_root() {
+  local codex_home="${CODEX_HOME:-${HOME}/.codex}"
+  local claude_home="${CLAUDE_HOME:-${HOME}/.claude}"
+  local codex_home_real
+  local claude_home_real
+  local script_dir
+  codex_home_real="$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$codex_home")"
+  claude_home_real="$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$claude_home")"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+
+  case "$script_dir" in
+    "${claude_home_real}/skills/"*)
+      printf '%s\n' "${claude_home}/session-notes"
+      ;;
+    "${codex_home_real}/skills/"*)
+      printf '%s\n' "${codex_home}/session-notes"
+      ;;
+    *)
+      printf '%s\n' "${codex_home}/session-notes"
+      ;;
+  esac
 }
 
 slugify() {
@@ -35,7 +58,7 @@ safe_token() {
 project_root="${PWD}"
 summary_file=""
 session_id=""
-global_root="${HOME}/.codex/session-notes"
+global_root="$(default_global_root)"
 trigger_label="/done"
 update_project_summary="true"
 

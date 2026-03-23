@@ -34,7 +34,15 @@ Then edit:
 ~/.codex/memories/obsidian-memory.json
 ```
 
-and set `vault_root` to your Obsidian vault.
+or:
+
+```bash
+~/.claude/memories/obsidian-memory.json
+```
+
+Use the Codex path when you installed for Codex, and the Claude path when you installed for Claude. If you install through another skills-platform integration, pass an explicit `--config-file` when you run the installer or scripts.
+
+Then set `vault_root` to your Obsidian vault.
 
 ## Included Skills
 
@@ -78,7 +86,7 @@ The installer:
 
 - installs `session-checkpoint`, `obsidian-memory-sink`, and `done-global`
 - creates or updates the target `AGENTS.md`
-- creates `~/.codex/memories/obsidian-memory.json` if it does not already exist
+- creates the platform-default `obsidian-memory.json` if it does not already exist
 
 It is safe to rerun:
 
@@ -86,6 +94,11 @@ It is safe to rerun:
 - existing `AGENTS.md` content is preserved, and only the managed Session Memory block is inserted or updated
 - existing `obsidian-memory.json` is preserved and not overwritten
 - when an existing `AGENTS.md` is modified, a backup file is created first
+
+Default config paths:
+
+- Codex: `~/.codex/memories/obsidian-memory.json`
+- Claude: `~/.claude/memories/obsidian-memory.json`
 
 Advanced usage:
 
